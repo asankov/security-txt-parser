@@ -1,11 +1,11 @@
-Contact: https://g.co/vulnz
-Contact: mailto:security@google.com
+Contact: https://example.com/vulnz
+Contact: mailto:security@example.com
 
-Encryption: https://services.google.com/corporate/publickey.txt
-Acknowledgments: https://bughunters.google.com/
+Encryption: https://example.com/publickey.txt
+Acknowledgments: https://example.com/
 
-Policy: https://g.co/vrp
-Hiring: https://g.co/SecurityPrivacyEngJobs
+Policy: https://example.com/policy
+Hiring: https://example.com/hiring
 
 Canonical: https://www.example.com/.well-known/security.txt
 Canonical: https://someserver.example.com/.well-known/security.txt

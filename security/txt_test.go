@@ -23,18 +23,18 @@ func TestSecurity(t *testing.T) {
 	require.NotNil(t, txt)
 
 	require.Equal(t, 1, len(txt.Acknowledgments))
-	require.Equal(t, "https://bughunters.google.com/", txt.Acknowledgments[0])
+	require.Equal(t, "https://example.com/", txt.Acknowledgments[0])
 
 	require.Equal(t, 2, len(txt.Canonical))
 	require.Contains(t, txt.Canonical, "https://www.example.com/.well-known/security.txt")
 	require.Contains(t, txt.Canonical, "https://someserver.example.com/.well-known/security.txt")
 
 	require.Equal(t, 2, len(txt.Contact))
-	require.Contains(t, txt.Contact, "https://g.co/vulnz")
-	require.Contains(t, txt.Contact, "mailto:security@google.com")
+	require.Contains(t, txt.Contact, "https://example.com/vulnz")
+	require.Contains(t, txt.Contact, "mailto:security@example.com")
 
 	require.NotEmpty(t, txt.Encryption)
-	require.Equal(t, "https://services.google.com/corporate/publickey.txt", txt.Encryption)
+	require.Equal(t, "https://example.com/publickey.txt", txt.Encryption)
 
 	require.False(t, txt.Expires.IsZero())
 	year, month, day := txt.Expires.Date()
@@ -43,10 +43,10 @@ func TestSecurity(t *testing.T) {
 	require.Equal(t, 31, day)
 
 	require.NotEmpty(t, txt.Policy)
-	require.Equal(t, "https://g.co/vrp", txt.Policy)
+	require.Equal(t, "https://example.com/policy", txt.Policy)
 
 	require.NotEmpty(t, txt.Hiring)
-	require.Equal(t, "https://g.co/SecurityPrivacyEngJobs", txt.Hiring)
+	require.Equal(t, "https://example.com/hiring", txt.Hiring)
 
 	require.Equal(t, 3, len(txt.PreferredLanguages))
 	require.Contains(t, txt.PreferredLanguages, "en")
