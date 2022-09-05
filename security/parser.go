@@ -9,16 +9,16 @@ import (
 )
 
 var (
-	CommentPrefix = "#"
+	commentPrefix = "#"
 
-	PolicyPrefix             = prefixed("Policy")
-	HiringPrefix             = prefixed("Hiring")
-	ContactPrefix            = prefixed("Contact")
-	ExpiresPrefix            = prefixed("Expires")
-	CanonicalPrefix          = prefixed("Canonical")
-	EncryptionPrefix         = prefixed("Encryption")
-	AcknowledgmentsPrefix    = prefixed("Acknowledgments")
-	PreferredLanguagesPrefix = prefixed("Preferred-Languages")
+	policyPrefix             = prefixed("Policy")
+	hiringPrefix             = prefixed("Hiring")
+	contactPrefix            = prefixed("Contact")
+	expiresPrefix            = prefixed("Expires")
+	canonicalPrefix          = prefixed("Canonical")
+	encryptionPrefix         = prefixed("Encryption")
+	acknowledgmentsPrefix    = prefixed("Acknowledgments")
+	preferredLanguagesPrefix = prefixed("Preferred-Languages")
 )
 
 func prefixed(s string) string {
@@ -56,56 +56,56 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 		line := scanner.Text()
 		line = strings.TrimSpace(line)
 
-		if strings.HasPrefix(line, CommentPrefix) || line == "" {
+		if strings.HasPrefix(line, commentPrefix) || line == "" {
 			continue
 		}
 
-		if strings.HasPrefix(line, AcknowledgmentsPrefix) {
-			value := strings.TrimPrefix(line, AcknowledgmentsPrefix)
+		if strings.HasPrefix(line, acknowledgmentsPrefix) {
+			value := strings.TrimPrefix(line, acknowledgmentsPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Acknowledgments = append(txt.Acknowledgments, value)
 			continue
 		}
 
-		if strings.HasPrefix(line, CanonicalPrefix) {
-			value := strings.TrimPrefix(line, CanonicalPrefix)
+		if strings.HasPrefix(line, canonicalPrefix) {
+			value := strings.TrimPrefix(line, canonicalPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Canonical = append(txt.Canonical, value)
 			continue
 		}
 
-		if strings.HasPrefix(line, ContactPrefix) {
-			value := strings.TrimPrefix(line, ContactPrefix)
+		if strings.HasPrefix(line, contactPrefix) {
+			value := strings.TrimPrefix(line, contactPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Contact = append(txt.Contact, value)
 			continue
 		}
 
-		if strings.HasPrefix(line, EncryptionPrefix) {
-			value := strings.TrimPrefix(line, EncryptionPrefix)
+		if strings.HasPrefix(line, encryptionPrefix) {
+			value := strings.TrimPrefix(line, encryptionPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Encryption = value
 			continue
 		}
 
-		if strings.HasPrefix(line, HiringPrefix) {
-			value := strings.TrimPrefix(line, HiringPrefix)
+		if strings.HasPrefix(line, hiringPrefix) {
+			value := strings.TrimPrefix(line, hiringPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Hiring = value
 			continue
 		}
 
-		if strings.HasPrefix(line, ExpiresPrefix) {
+		if strings.HasPrefix(line, expiresPrefix) {
 			if !txt.Expires.IsZero() {
 				return nil, ErrExpiresMustBePresentOnlyOnce
 			}
 
-			value := strings.TrimPrefix(line, ExpiresPrefix)
+			value := strings.TrimPrefix(line, expiresPrefix)
 			value = strings.Trim(value, " ")
 
 			expires, err := time.Parse(time.RFC3339, value)
@@ -117,20 +117,20 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			continue
 		}
 
-		if strings.HasPrefix(line, PolicyPrefix) {
-			value := strings.TrimPrefix(line, PolicyPrefix)
+		if strings.HasPrefix(line, policyPrefix) {
+			value := strings.TrimPrefix(line, policyPrefix)
 			value = strings.Trim(value, " ")
 
 			txt.Policy = value
 			continue
 		}
 
-		if strings.HasPrefix(line, PreferredLanguagesPrefix) {
+		if strings.HasPrefix(line, preferredLanguagesPrefix) {
 			if len(txt.PreferredLanguages) != 0 {
 				return nil, ErrPreferredLanguagesMustBePresentOnlyOnce
 			}
 
-			value := strings.TrimPrefix(line, PreferredLanguagesPrefix)
+			value := strings.TrimPrefix(line, preferredLanguagesPrefix)
 			value = strings.Trim(value, " ")
 
 			values := strings.Split(value, ",")
