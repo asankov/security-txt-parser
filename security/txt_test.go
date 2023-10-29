@@ -1,6 +1,7 @@
 package security_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -52,6 +53,26 @@ func TestSecurity(t *testing.T) {
 	require.Contains(t, txt.PreferredLanguages, "en")
 	require.Contains(t, txt.PreferredLanguages, "es")
 	require.Contains(t, txt.PreferredLanguages, "fr")
+}
+
+func ExampleParse() {
+	file, err := os.Open("testdata/security.txt")
+	if err != nil {
+		// error handling
+		return
+	}
+
+	txt, err := security.Parse(file)
+	if err != nil {
+		// error handling
+		return
+	}
+
+	fmt.Println(txt.Contact[0])
+	fmt.Println(txt.Contact[1])
+	// Output:
+	// https://example.com/vulnz
+	// mailto:security@example.com
 }
 
 func TestSecurityErr(t *testing.T) {
