@@ -11,6 +11,8 @@ import (
 )
 
 func TestSecurity(t *testing.T) {
+	t.Parallel()
+
 	file, err := os.Open("testdata/security.txt")
 	require.NoError(t, err)
 
@@ -76,6 +78,8 @@ func ExampleParse() {
 }
 
 func TestSecurityErr(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		name          string
 		fileName      string
@@ -114,7 +118,11 @@ func TestSecurityErr(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		testCase := testCase
+
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			file, err := os.Open("testdata/" + testCase.fileName)
 			require.NoError(t, err)
 
