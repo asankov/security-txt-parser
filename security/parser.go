@@ -26,11 +26,16 @@ func prefixed(s string) string {
 }
 
 var (
-	ErrExpiresMustBePresentOnlyOnce            = fmt.Errorf("Expires field must be present only once")
+	// ErrExpiresMustBePresentOnlyOnce is returned when the Expires field is present more than once.
+	ErrExpiresMustBePresentOnlyOnce = fmt.Errorf("Expires field must be present only once") //nolint:stylecheck
+	// ErrPreferredLanguagesMustBePresentOnlyOnce is returned when the PreferredLanguages field is present more than once.
 	ErrPreferredLanguagesMustBePresentOnlyOnce = fmt.Errorf("PreferredLanguages field must be present only once")
-	ErrContactMustBePresent                    = fmt.Errorf("Contact must be present")
-	ErrExpiresMustBePresent                    = fmt.Errorf("Expires must be present")
-	ErrExpiresNotAValidRFC3339Date             = fmt.Errorf("Expires is not a valid RFC3339 date")
+	// ErrContactMustBePresent is returned when the Contact field is not present.
+	ErrContactMustBePresent = fmt.Errorf("Contact must be present") //nolint:stylecheck
+	// ErrExpiresMustBePresent is returned when the Expires field is not present.
+	ErrExpiresMustBePresent = fmt.Errorf("Expires must be present") //nolint:stylecheck
+	// ErrExpiresNotAValidRFC3339Date is returned when the Expires field is not a valid RFC3339 date.
+	ErrExpiresNotAValidRFC3339Date = fmt.Errorf("Expires is not a valid RFC3339 date") //nolint:stylecheck
 )
 
 var (
@@ -47,11 +52,14 @@ var (
 type Parser struct{}
 
 // Parse parses a security.txt file.
+//
+//nolint:funlen,gocognit,cyclop
 func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 	var (
 		txt     TXT
 		scanner = bufio.NewScanner(in)
 	)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		line = strings.TrimSpace(line)
@@ -65,6 +73,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Acknowledgments = append(txt.Acknowledgments, value)
+
 			continue
 		}
 
@@ -73,6 +82,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Canonical = append(txt.Canonical, value)
+
 			continue
 		}
 
@@ -81,6 +91,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Contact = append(txt.Contact, value)
+
 			continue
 		}
 
@@ -89,6 +100,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Encryption = value
+
 			continue
 		}
 
@@ -97,6 +109,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Hiring = value
+
 			continue
 		}
 
@@ -114,6 +127,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			}
 
 			txt.Expires = expires
+
 			continue
 		}
 
@@ -122,6 +136,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			value = strings.Trim(value, " ")
 
 			txt.Policy = value
+
 			continue
 		}
 
@@ -137,6 +152,7 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 			for _, value := range values {
 				txt.PreferredLanguages = append(txt.PreferredLanguages, strings.Trim(value, " "))
 			}
+
 			continue
 		}
 
@@ -146,12 +162,13 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 	if len(txt.Contact) == 0 {
 		return nil, ErrContactMustBePresent
 	}
+
 	if txt.Expires.IsZero() {
 		return nil, ErrExpiresMustBePresent
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while reading file: %w", err)
 	}
 
 	return &txt, nil

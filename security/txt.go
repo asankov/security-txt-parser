@@ -6,7 +6,6 @@ import (
 
 // TXT contains the information from the security.txt file.
 type TXT struct {
-
 	// Acknowledgments indicates a link to a page where security researchers are recognized for their reports.
 	Acknowledgments []string
 
@@ -35,13 +34,15 @@ type TXT struct {
 	//
 	// The values within this set are language tags as defined in RFC5646.
 	//
-	// If this field is absent, security researchers may assume that English is the language to be used as per section 4.5 of RFC2277.
+	// If this field is absent, security researchers may assume that English is the language
+	// to be used as per section 4.5 of RFC2277.
 	//
 	// The order in which they appear is not an indication of priority; the
 	// listed languages are intended to have equal priority.
 	PreferredLanguages []string
 
-	// Expires indicates the date and time after which the data contained in the "security.txt" file is considered stale and should not be used
+	// Expires indicates the date and time after which the data contained in the "security.txt"
+	// file is considered stale and should not be used
 	// The value of this field is formatted according to the Internet profile of ISO.8601 as defined in RFC3339.
 	//
 	// This field MUST always be present and MUST NOT appear more than once.
