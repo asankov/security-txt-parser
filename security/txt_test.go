@@ -64,6 +64,8 @@ func ExampleParse() {
 		return
 	}
 
+	defer file.Close()
+
 	txt, err := security.Parse(file)
 	if err != nil {
 		// error handling
