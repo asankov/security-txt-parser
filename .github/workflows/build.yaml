@@ -1,0 +1,56 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+jobs:
+  check-go-mod-tidy:
+    name: Check `go mod tidy`
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+      - name: Run `go mod tidy` and verify no changes
+        run: |
+          go mod tidy
+          if [ -n "$(git status --porcelain)" ]
+          then
+              git status --short; \
+              echo; \
+              echo "Did you remember to run `go mod tidy`? Run `go mod tidy` and commit the result."; \
+              exit 1; \
+          fi
+  build:
+    name: Build library
+    runs-on: ubuntu-latest
+    needs:
+      - check-go-mod-tidy
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+      - name: Build library
+        run: |
+          go build ./...
+  test:
+    name: Run the unit tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+      - name: Run the unit tests
+        run: |
+          go test -covermode=count -coverprofile=coverage.info ./...
