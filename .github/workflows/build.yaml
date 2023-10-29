@@ -27,7 +27,7 @@ jobs:
               exit 1; \
           fi
   golangci-lint:
-    name: lint
+    name: Run Linters
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
