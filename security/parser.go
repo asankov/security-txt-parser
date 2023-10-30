@@ -4,8 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 var (
@@ -39,17 +45,51 @@ var (
 )
 
 var (
-	defaultParser Parser
+	defaultParser Parser = *NewParserWithOptions(ParserOptions{
+		Logger: slog.Default(),
+	})
 
 	// Parse parses a security.txt file using the default parser.
 	Parse = defaultParser.Parse
+
+	ParseFromURL = defaultParser.ParseFromURL
 )
 
 // Parser is a struct that parses the security.txt file.
 //
 // Its purpose is to allow customization of the parsing via configuration.
-// Currently no customizations are available.
-type Parser struct{}
+type Parser struct {
+	logger     *slog.Logger
+	httpClient *http.Client
+}
+
+type ParserOptions struct {
+	Logger     *slog.Logger
+	HTTPClient *http.Client
+}
+
+func NewParser() *Parser {
+	return NewParserWithOptions(ParserOptions{
+		Logger:     slog.New(slog.NewTextHandler(os.Stdout, nil)),
+		HTTPClient: http.DefaultClient,
+	})
+}
+
+func NewParserWithOptions(opts ParserOptions) *Parser {
+	p := &Parser{}
+	if opts.Logger != nil {
+		p.logger = opts.Logger
+	}
+	if opts.HTTPClient != nil {
+		p.httpClient = opts.HTTPClient
+	}
+	return p
+}
+
+func (p *Parser) SetLogger(logger *slog.Logger) *Parser {
+	p.logger = logger
+	return p
+}
 
 // Parse parses a security.txt file.
 //
@@ -172,4 +212,62 @@ func (p *Parser) Parse(in io.Reader) (*TXT, error) {
 	}
 
 	return &txt, nil
+}
+
+func (p *Parser) ParseFromURL(rawURL string) (*TXT, error) {
+
+	url, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse provided URL [%s]: %w", rawURL, err)
+	}
+
+	res, err := p.parseFromURL(rawURL)
+
+	if err == nil {
+		return res, nil
+	}
+
+	var multiErr *multierror.Error
+	multiErr = multierror.Append(multiErr, err)
+
+	p.logger.Warn("Unable to parse file at given location", "url", rawURL, "error", err)
+
+	if url.Path == "/" || url.Path == "" {
+		p.logger.Warn("Provided URL has empty path, trying more URLs with known paths", "url", url)
+
+		trimmedURL := strings.TrimSuffix(url.String(), "/")
+		for _, path := range []string{"security.txt", ".well-known/security.txt"} {
+			newURL := trimmedURL + "/" + path
+
+			p.logger.Info("Trying URL", "url", newURL)
+
+			res, err := p.parseFromURL(newURL)
+
+			if err == nil {
+				return res, nil
+			} else {
+				p.logger.Warn("Unable to parse file at given location", "url", newURL, "error", err)
+
+				multiErr = multierror.Append(multiErr, err)
+			}
+		}
+	}
+
+	return nil, multiErr.ErrorOrNil()
+}
+
+func (p *Parser) parseFromURL(url string) (*TXT, error) {
+	resp, err := p.httpClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode > 299 {
+		return nil, &statusCodeError{
+			statusCode: resp.StatusCode,
+			url:        url,
+		}
+	}
+
+	return p.Parse(resp.Body)
 }
